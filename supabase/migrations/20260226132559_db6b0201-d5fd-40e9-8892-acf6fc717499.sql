@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS public._migration_id_map;

@@ -1,0 +1,1 @@
+ALTER TABLE public.recipe_types ADD COLUMN IF NOT EXISTS icon text DEFAULT 'chef-hat';

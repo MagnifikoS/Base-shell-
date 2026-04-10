@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <title>Base Shell Foundation</title>
+    <meta name="description" content="Application de gestion restaurant" />
+    <meta name="author" content="Restaurant OS" />
+    
+    <!-- Mobile app meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#1e40af" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- Security headers (frame-ancestors & X-Frame-Options moved to vercel.json HTTP headers) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <!-- iOS safe area support -->
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:title" content="Base Shell Foundation" />
+    <meta property="og:description" content="Application de gestion restaurant" />
+    <meta property="og:type" content="website" />
+    <!-- TODO: Replace with your own OG image -->
+    <meta property="og:image" content="/og-image.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@RestaurantOS" />
+    <!-- TODO: Replace with your own Twitter image -->
+    <meta name="twitter:image" content="/og-image.png" />
+  </head>
+
+  <body style="background:#0a0a0b">
+    <div id="root">
+      <!-- FIX-1: Inline splash — visible instantly while JS downloads + parses -->
+      <!-- React will replace this div's contents on mount -->
+      <div id="inline-splash" style="min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0a0a0b;font-family:system-ui,-apple-system,sans-serif">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="width:48px;height:48px;border-radius:12px;background:#1e40af;display:flex;align-items:center;justify-content:center">
+            <span style="color:#fff;font-weight:700;font-size:20px">R</span>
+          </div>
+          <span style="font-size:18px;font-weight:600;color:#fafafa;letter-spacing:-0.025em">Restaurant OS</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <div class="splash-dot" style="animation-delay:0ms"></div>
+          <div class="splash-dot" style="animation-delay:150ms"></div>
+          <div class="splash-dot" style="animation-delay:300ms"></div>
+        </div>
+      </div>
+      <style>
+        .splash-dot{width:8px;height:8px;border-radius:50%;background:rgba(59,130,246,.6);animation:splash-bounce 1s infinite}
+        @keyframes splash-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+      </style>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

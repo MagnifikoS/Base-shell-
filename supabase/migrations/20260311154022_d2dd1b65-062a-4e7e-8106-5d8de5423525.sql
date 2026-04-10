@@ -1,0 +1,1 @@
+ALTER TABLE public.commandes ADD COLUMN source_commande_id uuid REFERENCES public.commandes(id) DEFAULT NULL;

@@ -1,0 +1,154 @@
+project_id = "yqsvsmjgxfhuejtriipp"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# IMPORTANT: ALL functions disable gateway JWT verification.
+# Auth is done IN CODE via getUser() — see CLAUDE.md Critical Rules #3.
+# If you add a new function, add it here with the same pattern.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# === CORE FUNCTIONS ===
+[functions.employees]
+verify_jwt = false
+
+[functions.badge-events]
+verify_jwt = false
+
+[functions.badge-pin]
+verify_jwt = false
+
+[functions.badge-settings]
+verify_jwt = false
+
+[functions.bootstrap-admin]
+verify_jwt = false
+
+[functions.planning-week]
+verify_jwt = false
+
+[functions.planning-rextra]
+verify_jwt = false
+
+[functions.establishment-hours]
+verify_jwt = false
+
+[functions.establishment-breaks]
+verify_jwt = false
+
+[functions.extra-validation]
+verify_jwt = false
+
+[functions.employee-documents]
+verify_jwt = false
+
+[functions.employee-archives]
+verify_jwt = false
+
+# === ADMIN FUNCTIONS ===
+[functions.admin-manage-establishments]
+verify_jwt = false
+
+[functions.admin-manage-teams]
+verify_jwt = false
+
+[functions.admin-manage-roles]
+verify_jwt = false
+
+[functions.admin-invitations]
+verify_jwt = false
+
+[functions.accept-invitation]
+verify_jwt = false
+
+[functions.admin-validate-users]
+verify_jwt = false
+
+[functions.admin-reset-password]
+verify_jwt = false
+
+# === TEST MODE FUNCTIONS (isolées pour suppression future) ===
+[functions.admin-create-test-user]
+verify_jwt = false
+
+[functions.admin-delete-test-user]
+verify_jwt = false
+
+[functions.admin-convert-test-user]
+verify_jwt = false
+
+# === PAYROLL ===
+[functions.payroll-daily-cost]
+verify_jwt = false
+
+[functions.payroll-validation]
+verify_jwt = false
+
+[functions.payroll-rextra-balance]
+verify_jwt = false
+
+# === BADGEUSE ===
+[functions.badgeuse-backfill]
+verify_jwt = false
+
+# === EXPORT ===
+[functions.export-products-csv]
+verify_jwt = false
+
+# === FINANCE & STOCK ===
+[functions.stock-ledger]
+verify_jwt = false
+
+# === CONGÉS & ABSENCES ===
+[functions.absence-declaration]
+verify_jwt = false
+
+# === VISION AI ===
+[functions.vision-ai-extract]
+verify_jwt = false
+
+[functions.translate-product-name]
+verify_jwt = false
+
+# === BACKFILL & MAINTENANCE ===
+[functions.backfill-product-codes]
+verify_jwt = false
+
+[functions.backfill-products-ssot]
+verify_jwt = false
+
+[functions.backfill-invoice-snapshots]
+verify_jwt = false
+
+[functions.data-retention-cleanup]
+verify_jwt = false
+
+# === HEALTH CHECK (public, no auth) ===
+[functions.health-check]
+verify_jwt = false
+
+# === PAY LEDGER AUTOMATION ===
+[functions.pay-auto-payments-cron]
+verify_jwt = false
+
+# === PUSH NOTIFICATIONS (module isolé) ===
+[functions.push-send]
+verify_jwt = false
+
+# === COMMANDES B2B V0 ===
+[functions.commandes-api]
+verify_jwt = false
+
+# === NOTIF ENGINE V0 (cron-triggered, service role) ===
+[functions.notif-check-badgeuse]
+verify_jwt = false
+
+# === PLATFORM ADMIN ===
+[functions.platform-create-user]
+verify_jwt = false
+
+# === SMART MATCH (Phase 2 — IA reranking) ===
+[functions.smart-match-rerank]
+verify_jwt = false
+
+# === COMMANDES PLATS B2B (isolé du module commandes produits) ===
+[functions.commandes-plats-api]
+verify_jwt = false

@@ -1,0 +1,44 @@
+{
+  "id": "/",
+  "name": "Restaurant OS",
+  "short_name": "RestaurantOS",
+  "description": "Plateforme de gestion pour la restauration",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pointeuse",
+      "url": "/badgeuse",
+      "description": "Acceder a la pointeuse"
+    },
+    {
+      "name": "Presence",
+      "url": "/presence",
+      "description": "Voir la presence du jour"
+    },
+    {
+      "name": "Planning",
+      "url": "/planning",
+      "description": "Voir le planning"
+    }
+  ],
+  "categories": ["business", "productivity"]
+}

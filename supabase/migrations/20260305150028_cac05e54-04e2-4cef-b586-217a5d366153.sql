@@ -1,0 +1,1 @@
+ALTER TABLE public.price_alerts ADD COLUMN IF NOT EXISTS acked_at timestamptz NULL;

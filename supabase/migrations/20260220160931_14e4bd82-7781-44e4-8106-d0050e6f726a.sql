@@ -1,0 +1,2 @@
+ALTER TABLE public.notification_rules DROP CONSTRAINT IF EXISTS chk_notification_rules_alert_type;
+ALTER TABLE public.notification_rules ADD CONSTRAINT chk_notification_rules_alert_type CHECK (alert_type IN ('late', 'no_badge', 'missing_clock_out'));

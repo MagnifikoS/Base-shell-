@@ -1,0 +1,1 @@
+ALTER TABLE public.products_v2 ADD COLUMN allow_unit_sale boolean NOT NULL DEFAULT false;
