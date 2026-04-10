@@ -453,6 +453,17 @@ export function AgentProduitPage() {
                 type: matchResult.type,
               }
             : null;
+        // DEBUG TEMPORAIRE: diagnostic matching fournisseur
+        // eslint-disable-next-line no-console
+        console.log("[AgentIA] fournisseur_detecte:", data.fournisseur_detecte);
+        // eslint-disable-next-line no-console
+        console.log("[AgentIA] fournisseur_info:", data.fournisseur_info);
+        // eslint-disable-next-line no-console
+        console.log("[AgentIA] extractedName:", extractedName);
+        // eslint-disable-next-line no-console
+        console.log("[AgentIA] matchResult:", matchResult);
+        // eslint-disable-next-line no-console
+        console.log("[AgentIA] supplierMatch final:", supplierMatch);
         const entry: StoredInvoice = {
           id,
           label,
@@ -716,9 +727,24 @@ export function AgentProduitPage() {
       {/* Liste des factures analysées */}
       {invoices.length > 0 && !analyzing && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-muted-foreground">
-            Factures analysées ({invoices.length})
-          </h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-muted-foreground">
+              Factures analysées ({invoices.length})
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-red-600 hover:text-red-700"
+              onClick={() => {
+                if (!establishmentId) return;
+                localStorage.removeItem(STORAGE_KEY_PREFIX + establishmentId);
+                setInvoices([]);
+                setSelectedId(null);
+              }}
+            >
+              Vider l'historique
+            </Button>
+          </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {invoices.map((inv) => (
               <button
