@@ -5,15 +5,18 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Paperclip, Play, Loader2, AlertCircle, FileText, X, CheckCircle2, PenLine, ArrowLeft } from "lucide-react";
+import { Paperclip, Play, Loader2, AlertCircle, FileText, X, CheckCircle2, PenLine, ArrowLeft, Info } from "lucide-react";
 import { ResponsiveLayout } from "@/components/mobile/ResponsiveLayout";
 import { ProductTable } from "./ProductTable";
 import { Button } from "@/components/ui/button";
 import { useEstablishment } from "@/contexts/EstablishmentContext";
 import { getWizardOptions } from "@/modules/produitsV2/pipeline/getWizardOptions";
 import type { WizardOptions } from "@/modules/produitsV2/pipeline/getWizardOptions";
+import { computeSupplierMatch } from "@/modules/fournisseurs/utils/supplierMatcher";
+import { getSupplierById, updateSupplier, type Supplier } from "@/modules/fournisseurs/services/supplierService";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "@/hooks/use-toast";
 
 const COMPARED_FIELDS = [
   "nom", "fournisseur", "categorie", "zone_stockage",
@@ -56,6 +59,53 @@ interface StoredInvoice {
   editableProducts: any[];
   totalProduits: number;
   timestamp: number;
+  supplierMatch?: {
+    id: string;
+    name: string;
+    similarity: number;
+    type: string;
+  } | null;
+  supplierInfo?: {
+    nom: string | null;
+    siret: string | null;
+    vat_number: string | null;
+    billing_address: string | null;
+    postal_code: string | null;
+    city: string | null;
+    country: string | null;
+    contact_email: string | null;
+    contact_phone: string | null;
+    iban: string | null;
+  } | null;
+}
+
+const ENRICHABLE_FIELDS = [
+  "siret",
+  "vat_number",
+  "billing_address",
+  "postal_code",
+  "city",
+  "country",
+  "contact_email",
+  "contact_phone",
+] as const;
+
+function computeEnrichmentPatch(
+  dbSupplier: Supplier | null,
+  supplierInfo: StoredInvoice["supplierInfo"] | undefined
+): Record<string, string> {
+  if (!dbSupplier || !supplierInfo) return {};
+
+  const patch: Record<string, string> = {};
+  for (const field of ENRICHABLE_FIELDS) {
+    const dbValue = dbSupplier[field];
+    const extractedValue = supplierInfo[field];
+    if (!dbValue && extractedValue) {
+      patch[field] = extractedValue;
+    }
+  }
+
+  return patch;
 }
 
 /**
@@ -194,6 +244,8 @@ export function AgentProduitPage() {
     establishmentId ? loadStoredInvoices(establishmentId) : [],
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const supplierCacheRef = useRef<Map<string, Supplier>>(new Map());
+  const [currentSupplierData, setCurrentSupplierData] = useState<Supplier | null>(null);
 
   // Reload invoices when establishment changes
   useEffect(() => {
@@ -218,6 +270,10 @@ export function AgentProduitPage() {
   const selectedInvoice = useMemo(
     () => invoices.find((inv) => inv.id === selectedId) ?? null,
     [invoices, selectedId],
+  );
+  const enrichmentPatch = useMemo(
+    () => computeEnrichmentPatch(currentSupplierData, selectedInvoice?.supplierInfo),
+    [currentSupplierData, selectedInvoice?.supplierInfo],
   );
 
   // Update editable products for the selected invoice
@@ -268,6 +324,37 @@ export function AgentProduitPage() {
 
     return () => { cancelled = true; };
   }, [establishmentId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const supplierId = selectedInvoice?.supplierMatch?.id ?? null;
+
+    if (!supplierId) {
+      setCurrentSupplierData(null);
+      return;
+    }
+
+    const cached = supplierCacheRef.current.get(supplierId);
+    if (cached) {
+      setCurrentSupplierData(cached);
+      return;
+    }
+
+    (async () => {
+      const result = await getSupplierById(supplierId);
+      if (cancelled) return;
+      if (result.success && result.data) {
+        supplierCacheRef.current.set(supplierId, result.data);
+        setCurrentSupplierData(result.data);
+      } else {
+        setCurrentSupplierData(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedInvoice?.supplierMatch?.id]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
@@ -332,6 +419,40 @@ export function AgentProduitPage() {
         // Build invoice entry and add to list
         const id = crypto.randomUUID();
         const label = data.numero_facture || data.numero_bl || currentFile.name;
+        const suppliersForMatch = wizardOpts.suppliers.map((s) => ({
+          ...s,
+          name_normalized: null as string | null,
+        }));
+        const supplierInfo = data?.fournisseur_info
+          ? {
+              nom: data.fournisseur_info.nom ?? null,
+              siret: data.fournisseur_info.siret ?? null,
+              vat_number: data.fournisseur_info.vat_number ?? null,
+              billing_address: data.fournisseur_info.billing_address ?? null,
+              postal_code: data.fournisseur_info.postal_code ?? null,
+              city: data.fournisseur_info.city ?? null,
+              country: data.fournisseur_info.country ?? null,
+              contact_email: data.fournisseur_info.contact_email ?? null,
+              contact_phone: data.fournisseur_info.contact_phone ?? null,
+              iban: data.fournisseur_info.iban ?? null,
+            }
+          : null;
+        const extractedName =
+          supplierInfo?.nom ??
+          data.fournisseur_detecte ??
+          null;
+        const matchResult = extractedName
+          ? computeSupplierMatch(extractedName, suppliersForMatch)
+          : null;
+        const supplierMatch =
+          matchResult && matchResult.similarity >= 0.7 && matchResult.supplierId && matchResult.supplierName
+            ? {
+                id: matchResult.supplierId,
+                name: matchResult.supplierName,
+                similarity: matchResult.similarity,
+                type: matchResult.type,
+              }
+            : null;
         const entry: StoredInvoice = {
           id,
           label,
@@ -340,6 +461,8 @@ export function AgentProduitPage() {
           editableProducts: mapRawProductsToTyped(structuredClone(data.produits ?? []), wizardOpts),
           totalProduits: data.total_produits ?? 0,
           timestamp: Date.now(),
+          supplierMatch,
+          supplierInfo,
         };
 
         setInvoices((prev) => [...prev, entry]);
@@ -356,6 +479,32 @@ export function AgentProduitPage() {
       setSelectedId(lastId);
     }
   };
+
+  const handleEnrichSupplier = useCallback(async () => {
+    if (!selectedInvoice?.supplierMatch?.id) return;
+    if (Object.keys(enrichmentPatch).length === 0) return;
+
+    try {
+      const result = await updateSupplier(selectedInvoice.supplierMatch.id, enrichmentPatch);
+      if (!result.success) {
+        throw new Error(result.error || "UPDATE_FAILED");
+      }
+      supplierCacheRef.current.delete(selectedInvoice.supplierMatch.id);
+      setCurrentSupplierData(null);
+      const refreshed = await getSupplierById(selectedInvoice.supplierMatch.id);
+      if (refreshed.success && refreshed.data) {
+        supplierCacheRef.current.set(selectedInvoice.supplierMatch.id, refreshed.data);
+        setCurrentSupplierData(refreshed.data);
+      }
+      toast({ title: "Fiche fournisseur complétée" });
+    } catch {
+      toast({
+        title: "Erreur",
+        description: "Impossible de compléter la fiche",
+        variant: "destructive",
+      });
+    }
+  }, [enrichmentPatch, selectedInvoice]);
 
   const canAnalyze = pendingFiles.length > 0 && wizardOpts !== null && !analyzing;
 
@@ -403,6 +552,21 @@ export function AgentProduitPage() {
               </div>
             )}
           </div>
+          {Object.keys(enrichmentPatch).length > 0 && (
+            <div className="flex items-center justify-between gap-3 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 shrink-0" />
+                <span>
+                  La facture contient {Object.keys(enrichmentPatch).length} information
+                  {Object.keys(enrichmentPatch).length > 1 ? "s" : ""} manquante
+                  {Object.keys(enrichmentPatch).length > 1 ? "s" : ""} sur ce fournisseur.
+                </span>
+              </div>
+              <Button size="sm" variant="outline" onClick={handleEnrichSupplier}>
+                Compléter la fiche
+              </Button>
+            </div>
+          )}
 
           {selectedInvoice.totalProduits === 0 && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
