@@ -15,6 +15,7 @@ dist-ssr
 # Environment files (keep .env tracked — contains only public anon key for Lovable)
 .env.local
 .env.*.local
+.env.dev
 .env.production
 .env.staging
 supabase/.env
